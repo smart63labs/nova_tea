@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Configurações</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{{ url_for('chat') }}">Chat</a>
+      <a href="{{ url_for('settings_model') }}">Configurações</a>
+      <a href="{{ url_for('agents_list') }}">Agentes</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Configurações de Modelo e Chave</h1>
+    <form method="POST">
+      <label>Modelo</label>
+      <input type="text" name="model" value="{{ model }}">
+      <label>Chave da API</label>
+      <input type="password" name="api_key" value="{{ api_key }}">
+      <button type="submit">Salvar</button>
+    </form>
+  </main>
+</body>
+</html>
