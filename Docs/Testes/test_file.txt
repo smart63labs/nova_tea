@@ -1,0 +1,3 @@
+O sistema O-eDOCS é uma plataforma de gestão de documentos digitais utilizada pela Secretaria da Fazenda.
+Ele permite o arquivamento, consulta e tramitação de processos administrativos de forma totalmente digital.
+O acesso é feito através do portal corporativo com credenciais de rede.

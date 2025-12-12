@@ -1,0 +1,9 @@
+Client attributes:
+['__class__', '__del__', '__delattr__', '__dict__', '__dir__', '__doc__', '__enter__', '__eq__', '__exit__', '__firstlineno__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__static_attributes__', '__str__', '__subclasshook__', '__weakref__', '_aio', '_api_client', '_batches', '_caches', '_debug_config', '_file_search_stores', '_files', '_get_api_client', '_models', '_operations', '_tokens', '_tunings', 'aio', 'auth_tokens', 'batches', 'caches', 'chats', 'close', 'file_search_stores', 'files', 'models', 'operations', 'tunings', 'vertexai']
+
+FileSearchStores attributes:
+['__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__firstlineno__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__static_attributes__', '__str__', '__subclasshook__', '__weakref__', '_api_client', '_list', '_upload_to_file_search_store', 'create', 'delete', 'documents', 'get', 'import_file', 'list', 'upload_to_file_search_store', 'vertexai']
+
+FileSearchStores.documents attributes:
+['__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__firstlineno__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__static_attributes__', '__str__', '__subclasshook__', '__weakref__', '_api_client', '_list', 'delete', 'get', 'list', 'vertexai']
+

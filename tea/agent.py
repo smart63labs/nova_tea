@@ -1,27 +1,57 @@
 from google.adk.agents.llm_agent import Agent
 from google.adk.tools.google_search_tool import GoogleSearchTool
 from google.adk.tools.agent_tool import AgentTool
+from tea.file_search_tool import FileSearchTool
+
 import re
 import unicodedata
 import os
 import json
 
-class TeaAgent(Agent):
-    """Custom Agent class to align with 'tea' app name."""
+class TiaAgent(Agent):
+    """Custom Agent class to align with 'tia' app name."""
     pass
 
 # Inicializa a ferramenta de busca
 search_tool = GoogleSearchTool()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_PATH = os.path.join(os.path.dirname(BASE_DIR), 'config', 'settings.json')
+# Mudança para ler de dados/config.json
+CONFIG_PATH = os.path.join(os.path.dirname(BASE_DIR), 'dados', 'config.json')
+AGENTS_DIR = os.path.join(os.path.dirname(BASE_DIR), 'dados', 'agentes')
 
 def _load_settings():
+    cfg = {}
     try:
         with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            cfg = json.load(f)
     except Exception:
-        return {}
+        pass
+        
+    # Load orchestrator config from orquestrador.json
+    try:
+        orq_path = os.path.join(AGENTS_DIR, 'orquestrador.json')
+        if os.path.exists(orq_path):
+            with open(orq_path, 'r', encoding='utf-8') as f:
+                root_data = json.load(f)
+                cfg['root'] = {
+                    'system_prompt': root_data.get('system_prompt', ''),
+                    'user_prompt': root_data.get('user_prompt', '')
+                }
+    except Exception:
+        pass
+        
+    return cfg
+
+def _load_agent_config(agent_id):
+    try:
+        agent_path = os.path.join(AGENTS_DIR, f'{agent_id}.json')
+        if os.path.exists(agent_path):
+            with open(agent_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return {}
 
 _settings = _load_settings()
 
@@ -102,31 +132,82 @@ entidades = [
 sub_agent_tools = []
 sub_agents_map = {}
 
+# Ensure agents directory exists
+os.makedirs(AGENTS_DIR, exist_ok=True)
+
 for entidade in entidades:
     agent_id = normalize_name(entidade)
-    agent_cfg = (_settings.get('agents') or {}).get(agent_id) or {}
+    
+    # Load specific agent config or create default if not exists
+    agent_cfg = _load_agent_config(agent_id)
+    
     model_name = _settings.get('model', 'gemini-2.5-flash')
-    inst = agent_cfg.get('system_prompt') or (
-        f'Você é um agente especialista em {entidade}. Atue EXCLUSIVAMENTE no contexto do Estado do Tocantins (Brasil). Não responda com informações federais ou de outros estados. Quando fizer buscas, inclua "Tocantins" e priorize fontes oficiais do Governo do Tocantins (portais *.to.gov.br, Diário Oficial do Tocantins, secretarias). Se a pergunta não for do escopo do Tocantins, explique o escopo e oriente a fonte oficial correta. Responda sempre em PT-BR.'
-    )
-    sub_agent = TeaAgent(
+    
+    inst = agent_cfg.get('system_prompt', '')
+    
+    # If config didn't exist, create it with default values
+    if not agent_cfg:
+        try:
+            with open(os.path.join(AGENTS_DIR, f'{agent_id}.json'), 'w', encoding='utf-8') as f:
+                json.dump({
+                    "name": entidade,
+                    "system_prompt": "",
+                    "user_prompt": "",
+                    "enabled": True
+                }, f, ensure_ascii=False, indent=2)
+        except:
+            pass
+
+    # Check if enabled (default to True if not specified)
+    is_enabled = agent_cfg.get('enabled', True)
+    
+    # Configure tools based on settings
+    current_tools = []
+    
+    # 2. File Search (RAG) - Priority over Web Search due to API conflict
+    fs_stores = agent_cfg.get('file_search_stores', [])
+    has_rag = False
+    if fs_stores and len(fs_stores) > 0:
+        # Ensure we are passing strings
+        valid_stores = [str(s) for s in fs_stores if s]
+        if valid_stores:
+            rag_tool = FileSearchTool(file_search_store_names=valid_stores)
+            current_tools.append(rag_tool)
+            has_rag = True
+
+    # 1. Web Search
+    enable_web = agent_cfg.get('enable_web_search', True)
+    if enable_web:
+        # User requested to keep Web Search enabled by default even with RAG
+        # Warning: Some API versions might conflict, but we enable it as requested.
+        current_tools.append(search_tool)
+        if has_rag:
+            pass # No longer disabling logic
+
+    sub_agent = TiaAgent(
         model=model_name,
         name=agent_id,
         description=f'Especialista em {entidade}.',
         instruction=inst,
-        tools=[search_tool]
+        tools=current_tools
     )
-    agent_tool = AgentTool(agent=sub_agent)
-    sub_agent_tools.append(agent_tool)
+    
     sub_agents_map[agent_id] = sub_agent
+    
+    # Only add to tools list if enabled
+    if is_enabled:
+        agent_tool = AgentTool(agent=sub_agent)
+        sub_agent_tools.append(agent_tool)
 
 # Agente Orquestrador
-root_agent = TeaAgent(
-    model=_settings.get('model', 'gemini-2.5-flash'),
-    name='TEA_Orquestrador',
-    description='Agente principal TEA que orquestra o atendimento.',
-    instruction=(
-        (_settings.get('root') or {}).get('system_prompt') or 'Você é o TEA, assistente do Governo do Tocantins. Sempre considere EXCLUSIVAMENTE o contexto do Estado do Tocantins (Brasil). Delegue para o agente especialista mais adequado usando as ferramentas disponíveis. Nas buscas, priorize fontes oficiais do Tocantins e inclua "Tocantins" nas consultas. Se a dúvida não for do escopo estadual, explique o escopo e oriente corretamente. Responda sempre em PT-BR e seja cortês.'
-    ),
+root_model = _settings.get('model', 'gemini-2.5-flash')
+
+root_inst = ((_settings.get('root') or {}).get('system_prompt', ''))
+root_agent = TiaAgent(
+    model=root_model,
+    name='TIA_Orquestrador',
+    description='Agente principal TIA que orquestra o atendimento.',
+    instruction=root_inst,
     tools=sub_agent_tools
 )
+
