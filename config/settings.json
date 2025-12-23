@@ -1,0 +1,8 @@
+{
+  "model": "gemini-2.5-flash",
+  "root": {
+    "system_prompt": "",
+    "user_prompt": ""
+  },
+  "agents": {}
+}

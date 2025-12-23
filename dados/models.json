@@ -1,0 +1,170 @@
+{
+  "active_model_id": "groq-kimi-k2",
+  "models": [
+    {
+      "id": "gemini-2.5-flash",
+      "name": "Gemini 2.5 Flash",
+      "type": "google_genai",
+      "enabled": true,
+      "description": "Modelo mais recente e recomendado. Rápido, eficiente e totalmente funcional.",
+      "api_key": "AIzaSyDyuTpNtx7U7ONXDxCGa02WCs9sksyXAXQ"
+    },
+    {
+      "id": "gemini-2.5-pro",
+      "name": "Gemini 2.5 Pro",
+      "type": "google_genai",
+      "enabled": false,
+      "description": "Para raciocínio complexo e análise avançada. Verificar quota disponível."
+    },
+    {
+      "id": "gemini-2.0-flash-exp",
+      "name": "Gemini 2.0 Flash (Experimental)",
+      "type": "google_genai",
+      "enabled": false,
+      "description": "⚠️ Sem quota no tier gratuito. Requer plano pago."
+    },
+    {
+      "id": "gemini-2.0-flash",
+      "name": "Gemini 2.0 Flash",
+      "type": "google_genai",
+      "enabled": false,
+      "description": "⚠️ Quota limitada. Pode requerer plano pago."
+    },
+    {
+      "id": "gemma-local",
+      "name": "Gemma Local (Docker)",
+      "type": "local_gemma",
+      "enabled": false,
+      "description": "Modelo local rodando em Docker. Testado e funcionando.",
+      "endpoint": "http://localhost:12434/engines/v1",
+      "model_hash": "ai/gemma3:latest"
+    },
+    {
+      "id": "deepseek-chat",
+      "name": "DeepSeek Chat (API)",
+      "type": "litellm",
+      "enabled": true,
+      "description": "Modelo DeepSeek V3 via API oficial.",
+      "model_name": "deepseek/deepseek-chat",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "api_key": "sk-7a7156a4c0e245a59fbca4febda7a759"
+    },
+    {
+      "id": "deepseek-local",
+      "name": "DeepSeek Local (Docker)",
+      "type": "litellm_local",
+      "enabled": false,
+      "description": "Modelo DeepSeek V3 rodando localmente no Docker.",
+      "model_name": "ollama_chat/deepseek-v3",
+      "api_base": "http://localhost:12434"
+    },
+    {
+      "id": "groq-llama-4-scout",
+      "name": "Meta Llama 4 Scout (Groq)",
+      "type": "litellm",
+      "enabled": true,
+      "description": "Novo modelo Llama 4. Otimizado para alta velocidade e eficiência (594 T/s).",
+      "model_name": "groq/meta-llama/llama-4-scout-17b-16e-instruct",
+      "api_key_env": "GROQ_API_KEY",
+      "api_key": "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"
+    },
+    {
+      "id": "groq-llama-4-maverick",
+      "name": "Meta Llama 4 Maverick (Groq)",
+      "type": "litellm",
+      "enabled": true,
+      "description": "Principal modelo Llama 4 MoE (128 especialistas). Alta capacidade agentic (562 T/s).",
+      "model_name": "groq/meta-llama/llama-4-maverick-17b-128e-instruct",
+      "api_key_env": "GROQ_API_KEY",
+      "api_key": "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"
+    },
+    {
+      "id": "groq-gpt-oss-120b",
+      "name": "GPT OSS 120B (Groq)",
+      "type": "litellm",
+      "enabled": true,
+      "description": "Modelo flagship MoE de OpenAI (Open-Weights) na infra da Groq (500 T/s).",
+      "model_name": "groq/openai/gpt-oss-120b",
+      "api_key_env": "GROQ_API_KEY",
+      "api_key": "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"
+    },
+    {
+      "id": "groq-gpt-oss-20b",
+      "name": "GPT OSS 20B (Groq)",
+      "type": "litellm",
+      "enabled": true,
+      "description": "Modelo OpenAI Open-Weights otimizado para custo e velocidade (1,000 T/s).",
+      "model_name": "groq/openai/gpt-oss-20b",
+      "api_key_env": "GROQ_API_KEY",
+      "api_key": "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"
+    },
+    {
+      "id": "groq-qwen3-32b",
+      "name": "Qwen3 32B (Groq)",
+      "type": "litellm",
+      "enabled": true,
+      "description": "Modelo Dense de Alibaba Cloud (Qwen) com suporte a contexto de 131k (662 T/s).",
+      "model_name": "groq/qwen/qwen3-32b",
+      "api_key_env": "GROQ_API_KEY",
+      "api_key": "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"
+    },
+    {
+      "id": "groq-kimi-k2",
+      "name": "Kimi K2 Instruct (Groq)",
+      "type": "litellm",
+      "enabled": true,
+      "description": "Modelo MoE de Moonshot AI com 1 Trilhão de parâmetros (200 T/s).",
+      "model_name": "groq/moonshotai/kimi-k2-instruct-0905",
+      "api_key_env": "GROQ_API_KEY",
+      "api_key": "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"
+    },
+    {
+      "id": "groq-llama-3.3-70b",
+      "name": "Meta Llama 3.3 70B (Groq)",
+      "type": "litellm",
+      "enabled": true,
+      "description": "Versátil e potente (394 T/s). Excelente equilíbrio entre performance e raciocínio.",
+      "model_name": "groq/llama-3.3-70b-versatile",
+      "api_key_env": "GROQ_API_KEY",
+      "api_key": "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"
+    },
+    {
+      "id": "groq-llama-3.1-8b",
+      "name": "Meta Llama 3.1 8B (Groq)",
+      "type": "litellm",
+      "enabled": true,
+      "description": "Ultra-rápido (840 T/s). Ideal para tarefas simples e respostas instantâneas.",
+      "model_name": "groq/llama-3.1-8b-instant",
+      "api_key_env": "GROQ_API_KEY",
+      "api_key": "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"
+    },
+    {
+      "id": "groq-llama-guard-4",
+      "name": "Meta Llama Guard 4 (Groq)",
+      "type": "litellm",
+      "enabled": false,
+      "description": "Modelo de segurança Llama 4 focado em moderação (325 T/s).",
+      "model_name": "groq/llama-guard-4-12b",
+      "api_key_env": "GROQ_API_KEY",
+      "api_key": "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"
+    },
+    {
+      "id": "groq-whisper-v3",
+      "name": "OpenAI Whisper Large V3 (Groq)",
+      "type": "litellm",
+      "enabled": false,
+      "description": "Modelo de transcrição de áudio de alta precisão.",
+      "model_name": "groq/whisper-large-v3",
+      "api_key_env": "GROQ_API_KEY"
+    },
+    {
+      "id": "groq-whisper-v3-turbo",
+      "name": "OpenAI Whisper Large V3 Turbo (Groq)",
+      "type": "litellm",
+      "enabled": false,
+      "description": "Versão ultra-rápida do Whisper para transcrição.",
+      "model_name": "groq/whisper-large-v3-turbo",
+      "api_key_env": "GROQ_API_KEY"
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TIA - Tocantins Inteligência Artificial</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{{ url_for('chat') }}">Chat</a>
+      <a href="{{ url_for('settings_models') }}">Configurações</a>
+      <a href="{{ url_for('agents_list') }}">Agentes</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Chat</h1>
+    <form id="chat-form">
+      <label>Destino</label>
+      <select name="target">
+        <option value="auto">Auto (Orquestrador)</option>
+        {% for aid, title in agents %}
+        <option value="{{ aid }}">{{ title }}</option>
+        {% endfor %}
+      </select>
+      <label>Mensagem</label>
+      <textarea name="message" rows="4" placeholder="Digite sua pergunta"></textarea>
+      <button type="submit" id="send-btn">Enviar</button>
+    </form>
+    <div id="loading" class="spinner-container">
+      <span id="loading-text" style="color: #0b57d0; font-size: 1.1em;">Processando... Por favor, aguarde.</span>
+    </div>
+    <section id="reply"></section>
+  </main>
+  <script>
+const loadingMessages = [
+    // Originais
+    "Analisando sua pergunta...",
+    "Consultando a base de conhecimento do Tocantins...",
+    "Verificando informações com as Secretarias...",
+    "Formatando a melhor resposta para você...",
+    "Só mais um momento, estou finalizando...",
+    
+    // Novas Adições
+    "Acessando os últimos leis, decretos e normativas...",
+    "Cruzando referências para garantir precisão...",
+    "Buscando dados atualizados nos sistemas do Estado...",
+    "Organizando as informações de forma clara...",
+    "Validando as fontes oficiais...",
+    "Verificando a legislação vigente sobre o tema..."
+];
+
+    document.getElementById('chat-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn = form.querySelector('button');
+      const replyDiv = document.getElementById('reply');
+      const loadingDiv = document.getElementById('loading');
+      // Tenta pegar o elemento pelo ID ou fallback para querySelector
+      const loadingText = document.getElementById('loading-text') || loadingDiv.querySelector('span');
+      
+      btn.disabled = true;
+      loadingDiv.style.display = 'flex';
+      replyDiv.textContent = '';
+
+      let loadingInterval;
+
+      // Só inicia a animação de texto se o elemento existir
+      if (loadingText) {
+          loadingText.innerText = loadingMessages[0];
+          let msgIndex = 0;
+          
+          loadingInterval = setInterval(() => {
+              msgIndex = (msgIndex + 1) % loadingMessages.length;
+              loadingText.innerText = loadingMessages[msgIndex];
+          }, 3000);
+      } else {
+          console.warn('Elemento de texto de loading não encontrado.');
+      }
+
+      try {
+        const data = new FormData(form);
+        const r = await fetch('{{ url_for("api_chat") }}', { method:'POST', body: data });
+        
+        if (!r.ok) {
+          const err = await r.json().catch(() => ({}));
+          throw new Error(err.error || `Erro no servidor: ${r.status}`);
+        }
+
+        const j = await r.json();
+        replyDiv.textContent = j.reply || '';
+      } catch (err) {
+        replyDiv.textContent = 'Erro: ' + err.message;
+      } finally {
+        if (loadingInterval) clearInterval(loadingInterval);
+        btn.disabled = false;
+        loadingDiv.style.display = 'none';
+        if (loadingText) loadingText.innerText = "Processando... Por favor, aguarde.";
+      }
+    });
+  </script>
+</body>
+</html>

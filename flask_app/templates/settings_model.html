@@ -1,0 +1,189 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Configurações de Modelos</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .model-card {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .model-card.active {
+      border-color: #4CAF50;
+      background-color: #e8f5e9;
+    }
+    .model-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .model-title {
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+    .model-desc {
+      font-size: 0.9em;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #ccc;
+      margin-right: 5px;
+    }
+    .status-success { background-color: #4CAF50; }
+    .status-error { background-color: #F44336; }
+    
+    .btn-test {
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .btn-test:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    .api-key-section {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+  </style>
+  <script>
+    async function testConnection(modelId, modelType) {
+        const btn = document.getElementById('btn-test-' + modelId);
+        const statusSpan = document.getElementById('status-' + modelId);
+        const endpointInput = document.querySelector(`input[name="endpoint_${modelId}"]`);
+        
+        const endpoint = endpointInput ? endpointInput.value : null;
+        
+        btn.disabled = true;
+        btn.textContent = "Testando...";
+        statusSpan.textContent = "";
+        statusSpan.className = "";
+        
+        try {
+            const response = await fetch('/api/models/test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model_id: modelId,
+                    model_type: modelType,
+                    endpoint: endpoint
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                statusSpan.textContent = "Conectado!";
+                statusSpan.className = "status-success";
+                alert("Conexão bem sucedida: " + data.message);
+            } else {
+                statusSpan.textContent = "Erro";
+                statusSpan.className = "status-error";
+                alert("Erro na conexão: " + data.message);
+            }
+        } catch (e) {
+            statusSpan.textContent = "Erro";
+            statusSpan.className = "status-error";
+            alert("Erro de rede: " + e);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Testar Conexão";
+        }
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{{ url_for('chat') }}">Chat</a>
+      <a href="{{ url_for('settings_model') }}">Configurações</a>
+      <a href="{{ url_for('api_agents_list') }}">Agentes</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Gerenciamento de Modelos</h1>
+    
+    <form method="POST">
+        <div class="api-key-section">
+            <h3>Chave da API Google (Global)</h3>
+            <p style="font-size: 0.9em; color: #666;">Necessária para os modelos Gemini.</p>
+            <input type="password" name="api_key" value="{{ api_key }}" style="width: 100%; padding: 8px; margin-top: 5px;">
+        </div>
+
+        <h2>Modelos Disponíveis</h2>
+        <div class="models-list">
+            {% for model in models_config.models %}
+            <div class="model-card {% if models_config.active_model_id == model.id %}active{% endif %}">
+                <div class="model-header">
+                    <label class="model-title">
+                        <input type="radio" name="active_model_id" value="{{ model.id }}" 
+                               {% if models_config.active_model_id == model.id %}checked{% endif %}>
+                        {{ model.name }}
+                    </label>
+                    <div>
+                        <label>
+                            <input type="checkbox" name="enabled_{{ model.id }}" 
+                                   {% if model.enabled %}checked{% endif %}>
+                            Habilitado
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="model-desc">{{ model.description }}</div>
+                
+                {% if model.type.startswith('local_') or model.type.startswith('litellm_local') %}
+                <div class="form-group">
+                    <label>Endpoint URL:</label>
+                    <input type="text" name="endpoint_{{ model.id }}" value="{{ model.endpoint or model.api_base }}" style="width: 100%; padding: 5px;">
+                </div>
+                {% endif %}
+                
+                {% if model.type == 'litellm' %}
+                <div class="form-group">
+                    <label>API Key (Opcional se usar env var):</label>
+                    <input type="password" name="api_key_{{ model.id }}" value="{{ model.api_key }}" style="width: 100%; padding: 5px;">
+                </div>
+                {% endif %}
+                
+                <div style="margin-top: 10px;">
+                    <button type="button" id="btn-test-{{ model.id }}" class="btn-test" 
+                            onclick="testConnection('{{ model.id }}', '{{ model.type }}')">
+                        Testar Conexão
+                    </button>
+                    <span id="status-{{ model.id }}" style="margin-left: 10px; font-weight: bold;"></span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div style="margin-top: 20px; text-align: right;">
+            <button type="submit" style="padding: 10px 20px; font-size: 1.1em; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Salvar Alterações
+            </button>
+        </div>
+    </form>
+  </main>
+</body>
+</html>
